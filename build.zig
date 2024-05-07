@@ -3,7 +3,6 @@ const std = @import("std");
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
-    const t = target.result;
 
     const lib = b.addStaticLibrary(.{
         .name = "SDL2",
@@ -15,7 +14,7 @@ pub fn build(b: *std.Build) void {
     lib.addCSourceFiles(.{ .files = &generic_src_files });
     lib.defineCMacro("SDL_USE_BUILTIN_OPENGL_DEFINITIONS", "1");
     lib.linkLibC();
-    switch (t.os.tag) {
+    switch (target.result.os.tag) {
         .windows => {
             lib.addCSourceFiles(.{ .files = &windows_src_files });
             lib.linkSystemLibrary("setupapi");
@@ -50,10 +49,10 @@ pub fn build(b: *std.Build) void {
                 .include_path = "SDL2/SDL_config.h",
             }, .{});
             lib.addConfigHeader(config_header);
-            lib.installConfigHeader(config_header, .{});
+            lib.installConfigHeader(config_header);
         },
     }
-    lib.installHeadersDirectory("include", "SDL2");
+    lib.installHeadersDirectory(.{ .path = "include" }, "SDL2", .{});
     b.installArtifact(lib);
 }
 
